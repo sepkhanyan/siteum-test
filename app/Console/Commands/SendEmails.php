@@ -2,11 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class SendEmails extends Command
 {
+    public $errors = [
+        'age' => [],
+        'email' => []
+    ];
     /**
      * The name and signature of the console command.
      *
@@ -38,7 +43,26 @@ class SendEmails extends Command
      */
     public function handle()
     {
-        Log::info('Mailing works!');
+        $users = User::orderBy('date_registration', 'ASC')->get();
+        $users = $this->checkAge($users);
+        Log::info($users->count());
+        foreach ($users as $user){
+            $user = $this->checkAge($users);
+            $this->sendMailTo($user);
+        }
         return Command::SUCCESS;
+    }
+
+    public function sendMailTo($user)
+    {
+      
+    }
+
+    public function checkAge($user)
+    {
+        if($user->age >= 18){
+            return $user;
+        }
+
     }
 }
